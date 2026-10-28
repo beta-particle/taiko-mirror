@@ -28,7 +28,7 @@ function corsHeaders() {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") {
@@ -37,7 +37,8 @@ export default {
 
     const matchedRoute = Object.keys(ROUTES).find(r => url.pathname === r || url.pathname.startsWith(r + "/"));
     if (!matchedRoute) {
-      return new Response("Not found. Known routes: " + Object.keys(ROUTES).join(", "), { status: 404 });
+      // Not an API route -> serve the static site (index.html, gameplay.html, ...)
+      return env.ASSETS.fetch(request);
     }
 
     const upstreamPath = ROUTES[matchedRoute] + url.pathname.slice(matchedRoute.length);
